@@ -7,6 +7,7 @@ const fs = require('fs')
 const SECRET = /rpc-secret=(.*)/.exec(
 	fs.readFileSync('aria2c.conf', 'utf-8')
 )[1]
+console.log(SECRET)
 const ENCODED_SECRET = Buffer.from(SECRET).toString('base64')
 
 const PORT = process.env.PORT || 1234
@@ -61,8 +62,7 @@ if (process.env.HEROKU_APP_NAME) {
 	const APP_URL = `https://${process.env.HEROKU_APP_NAME}.herokuapp.com`
 	const preventIdling = () => {
 		request.post(
-			'http://127.0.0.1:6800/jsonrpc',
-			{
+			'http://127.0.0.1:6800/jsonrpc', {
 				json: {
 					jsonrpc: '2.0',
 					method: 'aria2.getGlobalStat',
@@ -72,7 +72,10 @@ if (process.env.HEROKU_APP_NAME) {
 			},
 			async (err, resp, body) => {
 				console.log('preventIdling: getGlobalStat response', body)
-				const { numActive, numWaiting } = body.result
+				const {
+					numActive,
+					numWaiting
+				} = body.result
 				const numUpload = await readNumUpload()
 				console.log(
 					'preventIdling: numbers',
@@ -82,8 +85,8 @@ if (process.env.HEROKU_APP_NAME) {
 				)
 				if (
 					parseInt(numActive) +
-						parseInt(numWaiting) +
-						parseInt(numUpload) >
+					parseInt(numWaiting) +
+					parseInt(numUpload) >
 					0
 				) {
 					console.log('preventIdling: make request to prevent idling')
